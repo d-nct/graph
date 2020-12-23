@@ -2,7 +2,7 @@
 
 ---
 
-__Autor__: Daniel Nocito
+__Autor__: Daniel Nocito[https://github.com/d-nct]
 
 
 
@@ -20,4 +20,4 @@ Tendo isso em vista, pontua-se que este repositório possui finalidade acadêmic
 
 ### Ajuda
 
-Cada estrutura base da classe de grafos contém uma _docstring_ detalhada. Utilize o comando `help` se necessário.
+Cada estrutura base da classe de grafos contém uma _docstring_ detalhada. Utilize o comando `help`, se necessário.
