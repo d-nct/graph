@@ -23,8 +23,8 @@ class Graph(object):
         """Base structures.
         """
         self.adj = collections.defaultdict(set)
-
         self.get_vertices()
+        self.get_edges()
         self.add_edges(arestas)
 
     def get_vertices(self):
@@ -140,7 +140,7 @@ class Graph(object):
         bool
             If the graph is traceable.
         list
-            List with  v  vertices such that  g(v)  is odd.
+            List with vertices  v  such that  g(v)  is odd.
         
         Observação
         ----------
