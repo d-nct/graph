@@ -1,5 +1,7 @@
 # -*- coding at utf-8 -*-
 
+# TODO: Se geramos um grafo contendo duas arestas exatamente iguais, só uma é computada. Preciso mudar a implementação base do armazenamento das arestas de `defaultdict(set)` para algum outro tipo hasheável que permita vértices iguais. Talvez `defaultdict(list)`?
+
 from collections import defaultdict
 import os
 import csv
@@ -11,9 +13,9 @@ class Grafo(object):
     """
 
     def __init__(self, arestas, direcionado=False):
-        """Base structures for the graph.
+        """Base structures.
         """
-        self.adj = defaultdict(set)
+        self._adj = defaultdict(set)
         self.direcionado = direcionado
         self.adiciona_arestas(arestas)
 
@@ -21,18 +23,18 @@ class Grafo(object):
     def get_vertices(self):
         """Returns the list of graph vertices.
         """
-        return list(self.adj.keys())
+        return list(self._adj.keys())
 
 
     def get_arestas(self):
         """Returns the list of graph edges.
         """
-        return [(k, v) for k in self.adj.keys() for v in self.adj[k]]
+        return [(k, v) for k in self._adj.keys() for v in self._adj[k]]
 
     def get_vizinhos(self, v) -> list:
         """Returns a list with the vertices adjacent to v
         """
-        ans = list(self.adj[v])
+        ans = list(self._adj[v])
         if ans == []:
             raise KeyError(f'404. {v} not found in graph.')
         return ans
@@ -61,40 +63,38 @@ class Grafo(object):
     def adiciona_aresta(self, u, v):
         """Adds an incident edge to the 'u' and 'v' vertices.
         """
-        self.adj[u].add(v)
+        self._adj[u].add(v)
         if not self.direcionado:
-            self.adj[v].add(u)
+            self._adj[v].add(u)
 
     def conexo(self):
         """Return the boolean if the graph is connected and the connected components
         
         Parameters
         ----------
-        v : object
-            The initial vertice for the searche.
         
         Returns
         -------
         bool
             If the graph is connected
         list of sets
-            Connecte components of the graph
+            Connected components of the graph
         
         Notes
         -----
         https://pt.wikipedia.org/wiki/Busca_em_largura
         """
         comp_conex = []
-        desconhecidos = set(self.adj)
+        desconhecidos = set(self._adj)
 
         while not len(desconhecidos) == 0:
             v = choice(list(desconhecidos))
-            fila = list(self.adj[v]) # vértices a serem buscados
-            mapeados = {v}.union(self.adj[v]) # vértices já encontrados
+            fila = list(self._adj[v]) # vértices a serem buscados
+            mapeados = {v}.union(self._adj[v]) # vértices já encontrados
             while fila != []:
                 v = fila[0]
                 del(fila[0])
-                adjacentes = list(self.adj[v])
+                adjacentes = list(self._adj[v])
                 for v in adjacentes:
                     if not v in mapeados:
                         fila.append(v)
@@ -112,12 +112,12 @@ class Grafo(object):
     def existe_aresta(self, u, v):
         """Return the boolean if exists at least one edge connecting  u  and  v.
         """
-        return u in self.adj and v in self.adj[u]
+        return u in self._adj and v in self._adj[u]
     
     def g(self, v) -> int:
         """Return o grau de  v.
         """
-        if not v in self.adj:
+        if not v in self._adj:
             raise KeyError(f'404. {v} not found in graph.')
         return len(self.get_vizinhos(v))
 
@@ -133,6 +133,8 @@ class Grafo(object):
     def bipartido(self):
         """Retorna o booleano se o grafo é bipartido.
         
+        Notes
+        -----
         Ele é bipartido se, e somente se, não admite um ciclo ímpar.
         """
         raise NotImplementedError
@@ -140,15 +142,17 @@ class Grafo(object):
     def dist(self, u, v):
         """Retorna a distância entre os vértices  u  e  v.
         
+        Notes
+        -----
         Definimos a distância como o número de arestas no menor u-v caminho.
         """
-        if not (u in self.adj and v in self.adj): raise KeyError(r'404. u ou v \notin{E(G)}')
+        if not (u in self._adj and v in self._adj): raise KeyError(r'404. u ou v \notin{E(G)}')
         if u == v: return 0
         encontrados = {u: 0} # vertice : dist(u)
-        fila = list(self.adj[u])
+        fila = list(self._adj[u])
         
         while True:
-            adjacentes = list(self.adj[u]) # vértices a serem buscados
+            adjacentes = list(self._adj[u]) # vértices a serem buscados
             for w in adjacentes:
                 if w == v:
                     return encontrados[u] +1
@@ -161,7 +165,7 @@ class Grafo(object):
             del(fila[0])
 
     def tracavel(self):
-        """Verify if the graph is traceable. In other words, if thr graph contains a open eulerian track that contains all the vertices in the graph.
+        """Verify if the graph is traceable. In other words, verify if the graph contains an open eulerian track that contains all the vertices in the graph.
         
         Returns
         -------
@@ -186,15 +190,15 @@ class Grafo(object):
             return False, impares
 
     def __len__(self):
-        return len(self.adj)
+        return len(self._adj)
 
 
     def __str__(self):
-        return '{}({})'.format(self.__class__.__name__, dict(self.adj))
+        return f'{self.__class__.__name__}({dict(self._adj)})'
 
 
     def __getitem__(self, v):
-        return self.adj[v]
+        return self._adj[v]
 
 
 
